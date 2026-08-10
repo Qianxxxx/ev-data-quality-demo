@@ -213,14 +213,25 @@
     .progress span { display:block; height:100%; background:var(--blue); transition:width .2s; }
     .help { position:fixed; z-index:20; top:17px; right:24px; color:#526f7d; font-size:16px; font-weight:650; }
 
-    @media(max-width:1000px){
+    /* Keep the desktop presentation on a 16:9 stage and scale the entire
+       composition to the available viewport. This prevents short browser
+       windows and the Windows taskbar from cropping slide content. */
+    @media(min-width:1200px){
+      .deck{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--deck-scale,1));transform-origin:center}
+      .canvas{width:min(1510px,calc(100% - 120px))}
+      h1{font-size:112px}h2{font-size:78px}h3{font-size:36px}.lead{font-size:31px}.big-label{font-size:35px}.body{font-size:25px}
+      .five{font-size:340px}.principle .verb{font-size:76px}.stage h3{font-size:36px}.case-total{font-size:300px}.final-line{font-size:55px}
+    }
+
+    @media(max-width:1199px){
       .canvas{width:calc(100vw - 54px);padding:34px 0 64px}.footer{left:27px;right:285px}.problem-layout,.benchmark-layout,.review-layout,.failure-layout{grid-template-columns:1fr;gap:24px}.orbit{display:none}.principle{gap:20px}.principle article{min-height:300px}.workflow{overflow:auto}.stage{min-width:160px}.transform{grid-template-columns:1fr;overflow:auto}.arrow{transform:rotate(90deg)}.control-chart{gap:25px}.control-band:nth-child(2),.control-band:nth-child(3){margin-left:0}.demo-layout{grid-template-columns:190px 1fr}.demo-nav div{font-size:15px}.score-chart{grid-template-columns:160px 1fr}.bar-line{grid-template-columns:125px 1fr 70px}.recommendations{gap:24px}
     }
-    @media(max-width:760px){
+    @media(max-width:1199px){
       body{overflow:auto;background:var(--paper)}.deck{height:auto}.slide{position:relative;display:block!important;min-height:100svh;overflow:visible;border-bottom:5px solid var(--blue)}.canvas{width:calc(100vw - 38px);height:auto;min-height:100svh;padding:44px 0 60px}.controls,.progress,.help,.footer{display:none}h1{font-size:clamp(48px,15vw,72px)}h2{font-size:clamp(40px,12vw,60px)}.hero-numbers,.workflow{flex-wrap:wrap}.hero-numbers{gap:26px}.principle,.control-chart,.review-layout,.benchmark-layout,.failure-layout,.recommendations{grid-template-columns:1fr}.principle article{min-height:0}.principle .verb{margin:26px 0 18px}.workflow{align-items:stretch}.stage{min-width:46%;padding-top:46px}.transform{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}.demo-layout{grid-template-columns:1fr}.demo-nav{display:none}.metric-chart{grid-template-columns:1fr 1fr}.score-chart{grid-template-columns:1fr}.score-head,.model-divider{display:none}.bar-line{grid-template-columns:1fr}.bar-track{height:34px}.recommendations{gap:26px}.final-line{margin-top:60px}}
-    @media(max-height:690px) and (min-width:761px){.canvas{padding-top:28px}h2{font-size:clamp(42px,4.5vw,66px)}.footer{bottom:12px}}
+    @media(max-width:1199px){html,body{overflow-x:hidden}}
+    @media(max-height:690px) and (min-width:1200px){.footer{bottom:12px}}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.slide.active{animation:none}.progress span{transition:none}}
-    @media print{body{overflow:visible;background:#fff}.deck{height:auto}.slide{position:relative;display:block!important;width:13.333in;height:7.5in;break-after:page}.controls,.progress,.help{display:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+    @media print{body{overflow:visible;background:#fff}.deck{position:static;left:auto;top:auto;width:auto;height:auto;transform:none}.slide{position:relative;display:block!important;width:13.333in;height:7.5in;break-after:page}.controls,.progress,.help{display:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
   </style>
 </head>
 <body>
@@ -443,6 +454,16 @@
       const slides=[...document.querySelectorAll('.slide')];
       const counter=document.getElementById('counter');
       const progress=document.getElementById('progressBar');
+      const stageWidth=1920;
+      const stageHeight=1080;
+      function fitDeck(){
+        if(matchMedia('(max-width:1199px)').matches){
+          document.documentElement.style.removeProperty('--deck-scale');
+          return;
+        }
+        const scale=Math.min(innerWidth/stageWidth,innerHeight/stageHeight);
+        document.documentElement.style.setProperty('--deck-scale',String(scale));
+      }
       let current=Math.max(0,Math.min(slides.length-1,(parseInt(location.hash.replace('#slide-',''),10)||1)-1));
       function show(index,hash=true){
         current=(index+slides.length)%slides.length;
@@ -463,8 +484,11 @@
       addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next()}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev()}if(e.key.toLowerCase()==='d')theme();if(e.key.toLowerCase()==='f')full();if(e.key==='Home')show(0);if(e.key==='End')show(slides.length-1)});
       let touchStartX=0;
       addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0]?.clientX||0},{passive:true});
-      addEventListener('touchend',e=>{if(matchMedia('(max-width:760px)').matches)return;const dx=(e.changedTouches[0]?.clientX||0)-touchStartX;if(Math.abs(dx)>60)(dx<0?next:prev)()},{passive:true});
+      addEventListener('touchend',e=>{if(matchMedia('(max-width:1199px)').matches)return;const dx=(e.changedTouches[0]?.clientX||0)-touchStartX;if(Math.abs(dx)>60)(dx<0?next:prev)()},{passive:true});
+      addEventListener('resize',fitDeck,{passive:true});
+      document.addEventListener('fullscreenchange',fitDeck);
       if(localStorage.getItem('evdq-theme')==='dark')document.documentElement.dataset.theme='dark';
+      fitDeck();
       show(current,false);
     })();
   </script>
