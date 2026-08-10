@@ -217,7 +217,7 @@
        composition to the available viewport. This prevents short browser
        windows and the Windows taskbar from cropping slide content. */
     @media(min-width:1200px){
-      .deck{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--deck-scale,1));transform-origin:center}
+      .deck{position:absolute;left:50%;top:50%;width:1920px;height:900px;transform:translate(-50%,-50%) scale(var(--deck-scale,1));transform-origin:center}
       .canvas{width:min(1510px,calc(100% - 120px))}
       h1{font-size:112px}h2{font-size:78px}h3{font-size:36px}.lead{font-size:31px}.big-label{font-size:35px}.body{font-size:25px}
       .five{font-size:340px}.principle .verb{font-size:76px}.stage h3{font-size:36px}.case-total{font-size:300px}.final-line{font-size:55px}
@@ -455,7 +455,7 @@
       const counter=document.getElementById('counter');
       const progress=document.getElementById('progressBar');
       const stageWidth=1920;
-      const stageHeight=1080;
+      const stageHeight=900;
       function fitDeck(){
         if(matchMedia('(max-width:1199px)').matches){
           document.documentElement.style.removeProperty('--deck-scale');
